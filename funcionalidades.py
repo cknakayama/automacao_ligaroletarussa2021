@@ -16,7 +16,7 @@ class Funcionalidades:
         auth = cursor.fetchall()
         return auth[0][0]
     
-    def autenticar(self):
+    def acesso_autenticado(self):
         api = cartolafc.Api()
         api._glb_id = self.pegar_autenticacao()
         return api
