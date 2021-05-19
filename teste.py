@@ -2,6 +2,5 @@ from funcionalidades import *
 import sqlite3
 
 x = Funcionalidades()
-y = x.pegar_autenticacao()
-print(y)
-
+y = x.pesquisar_liga("roleta")
+x.listar_itens(y)
