@@ -59,6 +59,7 @@ class Funcionalidades:
                 print(f" {dic[chaves[c]]:<{maiores[c]+2}} ", end="")
             print()
             numero += 1
+        print(f" {'0':^4}  Nenhuma das alternativas")
    
     def pesquisar_time(self, termo_pesquisa=None):
         api = self.acesso_autenticado()
@@ -71,6 +72,14 @@ class Funcionalidades:
             lista_times.append(temp)
         return lista_times
 
+    def pegar_dados_time_avulso(self, time):
+        time_id = time['id']
+        api = self.acesso_autenticado()
+        dados_time = api.time(id=time_id, as_json=True)
+        time['patrimonio']=dados_time['patrimonio']
+        time['pontos_rodada']=dados_time['pontos']
+        return time
+
     def pesquisar_liga(self, termo_pesquisa=None):
         api = self.acesso_autenticado()
         if not termo_pesquisa:
@@ -81,6 +90,21 @@ class Funcionalidades:
             temp = {"nome":item.nome, "slug":item.slug}
             lista_ligas.append(temp)
         return lista_ligas
+
+    def pegar_pontuacao_times_liga(self, liga, turno=False, mes=False, rodada=False, patrimonio=False):
+        liga_slug = liga['slug']
+        api = self.acesso_autenticado()
+        if not any(turno, mes, rodada, patrimonio):
+            times_liga = api.liga(slug=liga_slug).times
+        elif turno:
+            times_liga = api.liga(slug=liga_slug, order_by='turno').times
+        elif mes:
+            times_liga = api.liga(slug=liga_slug, order_by='mes').times
+        elif rodada:
+            times_liga = api.liga(slug=liga_slug, order_by='rodada').times
+        elif patrimonio:
+            times_liga = api.liga(slug=liga_slug, order_by='patrimonio').times
+        return times_liga
 
     @staticmethod
     def int_input(texto=''):
@@ -103,5 +127,6 @@ class Funcionalidades:
             else:
                 print('Opção inválida.')
         
-        
+    def cadastrar_times_liga(self):
+        pass    
     
