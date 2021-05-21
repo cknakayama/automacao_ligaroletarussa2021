@@ -12,6 +12,16 @@ class Funcionalidades:
         cursor = con.cursor()
         return con, cursor
 
+    def pegar_tabelas_BD(self):
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        lista = cursor.fetchall()
+        tabelas = []
+        for tabela in lista:
+            dic = {'nome':tabela[0]}
+            tabelas.append(dic)
+        return tabelas
+
     def pegar_autenticacao(self):
         con, cursor = self.acessar_banco_de_dados()
         cursor.execute("SELECT cookie FROM Auth")
@@ -89,7 +99,7 @@ class Funcionalidades:
             lista_ligas.append(temp)
         return lista_ligas
 
-    def pegar_pontuacao_times_liga(self, liga):
+    def pegar_times_liga(self, liga):
         liga_slug = str(liga['slug'])
         times_liga = self.api.liga(slug=liga_slug)
         return times_liga.times
@@ -118,8 +128,35 @@ class Funcionalidades:
     def cadastrar_time_BD(self, tabela, dados):
         dados_time = (dados['id'], dados['nome'], dados['cartoleiro'])
         con, cursor = self.acessar_banco_de_dados()
-        cursor.execute(f'INSERT INTO {tabela}(ID, Nome, Cartoleiro) VALUES{dados_time}')
-        con.commit()
-        print(f'Time {dados_time[1]} foi cadastrado com sucesso.')
+        try:
+            cursor.execute(f'INSERT INTO {tabela}(ID, Nome, Cartoleiro) VALUES{dados_time}')
+        except:
+            print(f'Já existe um cadastro do time {dados_time[1]}.')
+            pass
+        else:
+            con.commit()
+            print(f'Time {dados_time[1]} foi cadastrado com sucesso.')
 
-    
+    def cadastrar_times_de_liga_BD(self):
+        while True:
+            ligas = self.pesquisar_liga()
+            self.listar_itens(ligas)
+            liga = self.escolher_entre_opcoes(ligas)
+            if liga:
+                break
+        times = self.pegar_times_liga(liga)
+        tabelas = self.pegar_tabelas_BD()
+        while True:
+            self.listar_itens(tabelas)
+            tabela = self.escolher_entre_opcoes(tabelas)['nome']
+            if not tabela:
+                exit()
+            else:
+                break
+        for time in times:
+            t = {'id':time.id, 'nome':time.nome, 'cartoleiro':time.nome_cartola}
+            self.cadastrar_time_BD(tabela=tabela, dados=t)
+        print('Times da liga foram salvos.')
+        
+
+        

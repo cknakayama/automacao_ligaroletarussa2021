@@ -11,7 +11,5 @@ x = Funcionalidades()
 #w = x.pegar_pontuacao_times_liga(z)
 #print(w)
 
-y = x.pesquisar_time()
-x.listar_itens(y)
-z = x.escolher_entre_opcoes(y)
-x.cadastrar_time_BD(tabela='LigaPrincipal', dados=z)
+y = x.cadastrar_times_de_liga_BD()
+
