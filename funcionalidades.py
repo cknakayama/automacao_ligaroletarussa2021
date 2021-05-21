@@ -5,6 +5,7 @@ import sqlite3
 class Funcionalidades:
     def __init__(self):
         self.banco_de_dados = "ligaroletarussa2021.db"
+        self.api = self.acesso_autenticado()
 
     def acessar_banco_de_dados(self):
         con = sqlite3.connect(self.banco_de_dados)
@@ -62,11 +63,10 @@ class Funcionalidades:
         print(f" {'0':^4}  Nenhuma das alternativas")
    
     def pesquisar_time(self, termo_pesquisa=None):
-        api = self.acesso_autenticado()
+        lista_times = []
         if not termo_pesquisa:
             termo_pesquisa = str(input('Digite o nome do Time: '))
-        times = api.times(query=termo_pesquisa)
-        lista_times = []
+        times = self.api.times(query=termo_pesquisa)
         for item in times:
             temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
             lista_times.append(temp)
@@ -74,37 +74,25 @@ class Funcionalidades:
 
     def pegar_dados_time_avulso(self, time):
         time_id = time['id']
-        api = self.acesso_autenticado()
-        dados_time = api.time(id=time_id, as_json=True)
+        dados_time = self.api.time(id=time_id, as_json=True)
         time['patrimonio']=dados_time['patrimonio']
         time['pontos_rodada']=dados_time['pontos']
         return time
 
     def pesquisar_liga(self, termo_pesquisa=None):
-        api = self.acesso_autenticado()
+        lista_ligas = []
         if not termo_pesquisa:
             termo_pesquisa = str(input('Digite o nome da Liga: '))
-        ligas = api.ligas(query=termo_pesquisa)
-        lista_ligas = []
+        ligas = self.api.ligas(query=termo_pesquisa)
         for item in ligas:
             temp = {"nome":item.nome, "slug":item.slug}
             lista_ligas.append(temp)
         return lista_ligas
 
-    def pegar_pontuacao_times_liga(self, liga, turno=False, mes=False, rodada=False, patrimonio=False):
-        liga_slug = liga['slug']
-        api = self.acesso_autenticado()
-        if not any(turno, mes, rodada, patrimonio):
-            times_liga = api.liga(slug=liga_slug).times
-        elif turno:
-            times_liga = api.liga(slug=liga_slug, order_by='turno').times
-        elif mes:
-            times_liga = api.liga(slug=liga_slug, order_by='mes').times
-        elif rodada:
-            times_liga = api.liga(slug=liga_slug, order_by='rodada').times
-        elif patrimonio:
-            times_liga = api.liga(slug=liga_slug, order_by='patrimonio').times
-        return times_liga
+    def pegar_pontuacao_times_liga(self, liga):
+        liga_slug = str(liga['slug'])
+        times_liga = self.api.liga(slug=liga_slug)
+        return times_liga.times
 
     @staticmethod
     def int_input(texto=''):
@@ -127,6 +115,11 @@ class Funcionalidades:
             else:
                 print('Opção inválida.')
         
-    def cadastrar_times_liga(self):
-        pass    
+    def cadastrar_time_BD(self, tabela, dados):
+        dados_time = (dados['id'], dados['nome'], dados['cartoleiro'])
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute(f'INSERT INTO {tabela}(ID, Nome, Cartoleiro) VALUES{dados_time}')
+        con.commit()
+        print(f'Time {dados_time[1]} foi cadastrado com sucesso.')
+
     
