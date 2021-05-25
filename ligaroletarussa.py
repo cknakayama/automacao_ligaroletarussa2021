@@ -42,6 +42,7 @@ class RoletaRussa:
                 break
         return api
 
+
 class CadastroTime(RoletaRussa):
     def __init__(self, dados=None, tabela=None):
         super().__init__()
@@ -95,6 +96,7 @@ class CadastroTime(RoletaRussa):
                 con.commit()
             print(f'Time {dados_time[1]} foi cadastrado com sucesso.')
 
+
 class CadastroTimesLiga(RoletaRussa):
     def __init__(self):
         super().__init__()
@@ -133,6 +135,7 @@ class CadastroTimesLiga(RoletaRussa):
             t = {'id':time.id, 'nome':time.nome, 'cartoleiro':time.nome_cartola}
             CadastroTime(dados=t, tabela=tabela)
         print('Times da liga foram salvos.')
+
 
 class Pontuacao(RoletaRussa):
     def __init__(self):
@@ -174,7 +177,8 @@ class Pontuacao(RoletaRussa):
             pass
         else:
             con.commit()
-    
+
+
 class PontosLigaPrincipal(Pontuacao):
     def __init__(self):
         super().__init__()
@@ -230,20 +234,16 @@ class PontosLigaPrincipal(Pontuacao):
             cursor.execute(f"UPDATE {tabela} SET PtsTotal={pontos_total} WHERE ID={t[0]}")
             con.commit()
 
+
 class PontosLigaEliminatoria(Pontuacao):
     def __init__(self):
         super().__init__()
         tabela = 'LigaEliminatoria'
         pontos = self.pegar_pontuacao_dos_times(tabela='LigaEliminatoria')
         for p in pontos:
-            self.salvar_pontos(tabela=tabela, coluna = 'PtsRodada', pontos = p)
+            self.salvar_pontos(tabela=tabela, coluna='PtsRodada', pontos=p)
         print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
-class Turno(Pontuacao):
-    pass
-
-class Returno(Pontuacao):
-    pass
 
 class Informativo(Pontuacao):
     def __init__(self):
