@@ -5,7 +5,7 @@ import cartolafc
 import pandas as pd
 
 
-x = PontosLigaPrincipal()
+x = PontosLigaEliminatoria()
 #y = x.pesquisar_liga()
 #x.listar_itens(y)
 #z = x.escolher_entre_opcoes(y)

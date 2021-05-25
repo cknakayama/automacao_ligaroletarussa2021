@@ -170,7 +170,7 @@ class Pontuacao(RoletaRussa):
         try:
             cursor.execute(f"UPDATE {tabela} SET {coluna}={pontos['pontos']} WHERE ID={pontos['id']}")
         except:
-            print(f'Coluna {coluna} não existe.')
+            print(f'Coluna {coluna} da talela {tabela} não existe.')
             pass
         else:
             con.commit()
@@ -237,7 +237,7 @@ class PontosLigaEliminatoria(Pontuacao):
         pontos = self.pegar_pontuacao_dos_times(tabela='LigaEliminatoria')
         for p in pontos:
             self.salvar_pontos(tabela=tabela, coluna = 'PtsRodada', pontos = p)
-        print('Pontuação dos times da Liga Principal salvas com SUCESSO.')
+        print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
 class Turno(Pontuacao):
     pass
