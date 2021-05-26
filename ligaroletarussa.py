@@ -274,7 +274,7 @@ class Pontuacao(RoletaRussa):
 
     def numero_de_eliminados(self):
         """
-        Define quantos times serão eliminados de acordo com a Rodada.
+        Define quantos times serão eliminados da Liga Eliminatória de acordo com a Rodada.
 
         Retorna:    numero_eliminados - inteiro com o número de eliminados
         """
@@ -393,7 +393,7 @@ class Informativos(Pontuacao):
     def __init__(self):
         super().__init__()
         self.con, self.cursor = self.acessar_banco_de_dados()
-        self.arquivo_xlsx = 'ligaroletarussa2021.xslx'
+        self.arquivo_xlsx = 'ligaroletarussa2021.xlsx'
         self.arquivo = load_workbook(self.arquivo_xlsx)
         self.top_10()
         self.turno_returno()
@@ -476,8 +476,8 @@ class Informativos(Pontuacao):
             planilha[f'B{contador}'] = time[0]
             planilha[f'C{contador}'] = time[1]
             contador += 1
+        c = self.numero_de_eliminados()
         while True:
-            c = self.numero_de_eliminados
             if c == 0:
                 break
             else:
