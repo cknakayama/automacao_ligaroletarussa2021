@@ -2,6 +2,7 @@ from sqlite3.dbapi2 import IntegrityError, OperationalError
 import cartolafc
 import sqlite3
 import requests
+from openpyxl import load_workbook
 from interface import Tela
 
 
@@ -271,6 +272,20 @@ class Pontuacao(RoletaRussa):
         else:
             con.commit()
 
+    def numero_de_eliminados(self):
+        """
+        Define quantos times serão eliminados de acordo com a Rodada.
+
+        Retorna:    numero_eliminados - inteiro com o número de eliminados
+        """
+        if 6 <= self.rodada_atual <= 24:
+            numero_eliminados = 1
+        elif 25 <= self.rodada_atual <= 37:
+            numero_eliminados = 2
+        else:
+            numero_eliminados = 0
+        return numero_eliminados
+
 
 class PontosLigaPrincipal(Pontuacao):
     """
@@ -285,7 +300,7 @@ class PontosLigaPrincipal(Pontuacao):
         self.salvar_mito()
         print('Pontuação dos times da Liga Principal salvas com SUCESSO.')
     
-    def salvar_principal(self, pontos:list(dict)):
+    def salvar_principal(self, pontos:list):
         """
         Salva as pontuações.
         OBS: Este método salva automativamente as pontuações das tabelas Turno e Returno, na
@@ -370,14 +385,105 @@ class PontosLigaEliminatoria(Pontuacao):
         print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
 
-class Informativo(Pontuacao):
+class Informativos(Pontuacao):
+    """
+    Atualiza a planilha de excel dos informativos.
+    Basta instanciar a classe que o informativo é atualizado automaticamente.
+    """
     def __init__(self):
         super().__init__()
         self.con, self.cursor = self.acessar_banco_de_dados()
+        self.arquivo_xlsx = 'ligaroletarussa2021.xslx'
+        self.arquivo = load_workbook(self.arquivo_xlsx)
+        self.top_10()
+        self.turno_returno()
+        self.patrimonio()
+        self.mito()
+        self.eliminatoria()
+        self.arquivo.save(self.arquivo_xlsx)
 
     def top_10(self):
-        coluna = f"Rodada{self.rodada_atual}"
-        self.cursor.execute("SELECT nome, {coluna} FROM LigaPrincipal order by {coluna} limit 10")
+        """
+        Salva os dados do TOP10 na planilha.
+        """
+        planilha = self.arquivo['LigaPrincipal']
+        self.cursor.execute("SELECT Nome, PtsTotal FROM LigaPrincipal order by PtsTotal limit 10")
         top10 = self.cursor.fetchall()
+        contador = 3
+        for time in top10:
+            planilha[f'B{contador}'] = time[0]
+            planilha[f'C{contador}'] = time[1]
+            contador += 1
 
+    def turno_returno(self):
+        """
+        Salva os dados do Turno ou do Returno na planilha.
+        """
+        planilha = self.arquivo['LigaPrincipal']
+        if self.rodada_atual <= 19:
+            self.cursor.execute("SELECT Nome, PtsTotal FROM Turno order by PtsTotal limit 3")
+            turno = self.cursor.fetchall()
+            contador = 3
+            for time in turno:
+                planilha[f'F{contador}'] = time[0]
+                planilha[f'G{contador}'] = time[1]
+                contador += 1
+        else:
+            self.cursor.execute("SELECT Nome, PtsTotal FROM Returno order by PtsTotal limit 3")
+            returno = self.cursor.fetchall()
+            contador = 9
+            for time in returno:
+                planilha[f'F{contador}'] = time[0]
+                planilha[f'G{contador}'] = time[1]
+                contador += 1
 
+    def patrimonio(self):
+        """
+        Salva os dados de patrimonio na planilha.
+        """
+        planilha = self.arquivo['LigaPrincipal']
+        self.cursor.execute("SELECT Nome, C$ FROM Patrimonio order by C$ limit 3")
+        patrimonio = self.cursor.fetchall()
+        contador = 15
+        for time in patrimonio:
+            planilha[f'F{contador}'] = time[0]
+            planilha[f'G{contador}'] = time[1]
+            contador += 1
+    
+    def mito(self):
+        """
+        Salva os dados de mito na planilha.
+        """
+        planilha = self.arquivo['LigaPrincipal']
+        self.cursor.execute("SELECT Nome, Pontuacao, Rodada FROM Mito order by Pontuacao limit 3")
+        patrimonio = self.cursor.fetchall()
+        contador = 21
+        for time in patrimonio:
+            planilha[f'F{contador}'] = time[0]
+            planilha[f'G{contador}'] = time[1]
+            planilha[f'H{contador}'] = time[2]
+            contador += 1
+    
+    def eliminatoria(self):
+        """
+        Salva os dados ds Liga Eliminatória na planilha e 'elimina' o(s) time(s) com menor pontuação.
+        """
+        planilha = self.arquivo['LigaEliminatória']
+        self.cursor.execute("SELECT Nome, PtsRodada, ID FROM LigaEliminatoria order by PtsRodada")
+        times = self.cursor.fetchall()
+        contador = 3
+        for time in times:
+            planilha[f'B{contador}'] = time[0]
+            planilha[f'C{contador}'] = time[1]
+            contador += 1
+        while True:
+            c = self.numero_de_eliminados
+            if c == 0:
+                break
+            else:
+                eliminado = times[-1]
+                self.cursor.execute(f'DELETE FROM LigaEliminatoria WHERE id={eliminado[2]}')
+                self.con.commit()
+                times.pop()
+            c -= 1
+        
