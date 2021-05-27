@@ -2,7 +2,7 @@ from sqlite3.dbapi2 import IntegrityError, OperationalError
 import cartolafc
 import sqlite3
 import requests
-import os
+from os import system
 from openpyxl import load_workbook
 
 opcoes_de_ligas = [{'opção':'Liga Principal'},
@@ -10,15 +10,24 @@ opcoes_de_ligas = [{'opção':'Liga Principal'},
 
 
 class Exibir:
+    """
+    Funções para exibir algo na tela.
+    """
     @staticmethod
-    def exibir_cabecalho(texto=''):
-        os.system('cls') or None
+    def exibir_cabecalho(texto:str =''):
+        system('cls') or None
         print('-'*39)
         print(f"|{texto.upper():^37}|")
         print('-'*39)
 
     @staticmethod
-    def listar_itens(lista):
+    def listar_itens(lista:list):
+        """
+        Método que exibe na tela uma lista tabelada das opções.
+        
+        Recebe:     lista - uma lista de dicionários contendo as opções.
+                    As chaves serão os cabeçalhos da tabela.
+        """
         chaves = [key for key in lista[0].keys()]
         maiores = []
         for chave in chaves:
@@ -43,7 +52,10 @@ class Exibir:
         print(f" {'0':^4}  Nenhuma das alternativas")
    
     @staticmethod
-    def int_input(texto=''):
+    def int_input(texto:str =''):
+        """
+        Método para garantir que a entada será um inteiro.
+        """
         while True:
             try:
                 entrada = int(input(texto))
@@ -53,7 +65,14 @@ class Exibir:
                 break
         return entrada
 
-    def escolher_entre_opcoes(self, dicionario):
+    def escolher_entre_opcoes(self, dicionario:list):
+        """"
+        Método que devolve a opção escolhida.
+        
+        Recebe:     dicionario - lista de dicionários com as opções.
+        
+        Retorna:    dicionário com a opção escolhida ou um dicionário vazio.
+        """
         while True:
             escolha = self.int_input(f'Escolha uma das opções entre 1 e {len(dicionario)} ou 0 e digite aqui sua escolha: ')
             if escolha == 0:
@@ -64,6 +83,11 @@ class Exibir:
                 print('Opção inválida.')
     
     def escolher_ligas_roleta_russa(self):
+        """
+        Método que lista e rece a escolha entre as ligas da Roleta Ru$$a.
+        
+        Retorna:    string com o nome da tabela escolhida ou uma string vazia.
+        """
         self.listar_itens(opcoes_de_ligas)
         escolha = self.escolher_entre_opcoes(opcoes_de_ligas)
         if not escolha:
@@ -212,11 +236,17 @@ class CadastroTimesLiga(RoletaRussa):
     """
     def __init__(self):
         super().__init__()
-        lista_ligas = self.pesquisar_liga()
         tela = Exibir()
-        tela.listar_itens(lista_ligas)
-        liga = tela.escolher_entre_opcoes(lista_ligas)
-        tabela = tela.escolher_ligas_roleta_russa()
+        while True:
+            lista_ligas = self.pesquisar_liga()
+            tela.listar_itens(lista_ligas)
+            liga = tela.escolher_entre_opcoes(lista_ligas)
+            if liga:
+                break
+        while True:
+            tabela = tela.escolher_ligas_roleta_russa()
+            if tabela:
+                break
         self.cadastrar_times_de_liga_BD(liga=liga, tabela=tabela)
         if tabela == 'LigaPrincipal':
             self.cadastrar_times_de_liga_BD(liga=liga, tabela='Patrimonio')
@@ -465,6 +495,8 @@ class Informativos(Pontuacao):
         self.mito()
         self.eliminatoria()
         self.arquivo.save(self.arquivo_xlsx)
+        self.arquivo.close()
+        print('Informativos Salvos com Sucesso.')
 
     def top_10(self):
         """
