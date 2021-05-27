@@ -8,7 +8,7 @@ menu_inicial = [{'opção':'Cadastrar time'},
                 {'opção':'Cadastrar times de uma liga'},
                 {'opção':'Atualizar informativos'},
                 {'opção':'Criar Liga Mata-mata'},
-                {'opcão':'Criar Liga Mata-mata em Duplas'}]
+                {'opção':'Criar Liga Mata-mata em Duplas'}]
 
 opcoes_de_ligas = [{'opção':'Liga Principal'},
                    {'opção':'Liga Eliminatória'}]
