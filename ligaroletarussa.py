@@ -2,8 +2,74 @@ from sqlite3.dbapi2 import IntegrityError, OperationalError
 import cartolafc
 import sqlite3
 import requests
+import os
 from openpyxl import load_workbook
-from interface import Tela
+
+opcoes_de_ligas = [{'opção':'Liga Principal'},
+                   {'opção':'Liga Eliminatória'}]
+
+
+class Exibir:
+    @staticmethod
+    def exibir_cabecalho(texto=''):
+        os.system('cls') or None
+        print('-'*39)
+        print(f"|{texto.upper():^37}|")
+        print('-'*39)
+
+    @staticmethod
+    def listar_itens(lista):
+        chaves = [key for key in lista[0].keys()]
+        maiores = []
+        for chave in chaves:
+            valor_maior = 0
+            for item in lista:
+                if len(str(item[chave])) > valor_maior:
+                    valor_maior = len(str(item[chave]))
+                else:
+                    pass
+            maiores.append(valor_maior)
+        print(f" {'No':_^4} ", end="")
+        for c in range(0, len(chaves)):
+            print(f" {chaves[c].upper():_^{maiores[c]+2}} ", end="")
+        print()
+        numero = 1
+        for dic in lista:
+            print(f" {(numero):^4} ", end="")
+            for c in range(0, len(chaves)):
+                print(f" {dic[chaves[c]]:<{maiores[c]+2}} ", end="")
+            print()
+            numero += 1
+        print(f" {'0':^4}  Nenhuma das alternativas")
+   
+    @staticmethod
+    def int_input(texto=''):
+        while True:
+            try:
+                entrada = int(input(texto))
+            except ValueError:
+                print('Digite um valor válido.')
+            else:
+                break
+        return entrada
+
+    def escolher_entre_opcoes(self, dicionario):
+        while True:
+            escolha = self.int_input(f'Escolha uma das opções entre 1 e {len(dicionario)} ou 0 e digite aqui sua escolha: ')
+            if escolha == 0:
+                return {}
+            elif 0 < escolha <= len(dicionario):
+                return dicionario[escolha-1]
+            else:
+                print('Opção inválida.')
+    
+    def escolher_ligas_roleta_russa(self):
+        self.listar_itens(opcoes_de_ligas)
+        escolha = self.escolher_entre_opcoes(opcoes_de_ligas)
+        if not escolha:
+            return ''
+        else:
+            return escolha['opcao'].replace(' ', '').replace('ó', 'o')
 
 
 class RoletaRussa:
@@ -68,23 +134,21 @@ class RoletaRussa:
 class CadastroTime(RoletaRussa):
     """
     Cadastrar um time no Banco de Dados.
-    
-    Recebe:     dados(opcional) - Dicionário com as informações do time.
-                tabela(opcional) - Nome da tabela onde os dados serão salvos.
+    Basta instanciar a classe que o processo de cadastro se inicia automaticamente.
     """
-    def __init__(self, dados:dict =None, tabela:str =None):
+    def __init__(self):
         super().__init__()
-        tela = Tela()
-        if dados:
-            time = dados
-        else:   
+        tela = Exibir()
+        while True:
             lista_times = self.pesquisar_time()
             tela.listar_itens(lista_times)
             time = tela.escolher_entre_opcoes(lista_times)
-        if tabela:
-            tabela=tabela
-        else:
+            if time:
+                break
+        while True:
             tabela = tela.escolher_ligas_roleta_russa()
+            if tabela:
+                break
         self.cadastrar_time_no_BD(tabela=tabela, dados=time)
     
     def pesquisar_time(self, termo_pesquisa:str =None):
@@ -149,7 +213,7 @@ class CadastroTimesLiga(RoletaRussa):
     def __init__(self):
         super().__init__()
         lista_ligas = self.pesquisar_liga()
-        tela = Tela()
+        tela = Exibir()
         tela.listar_itens(lista_ligas)
         liga = tela.escolher_entre_opcoes(lista_ligas)
         tabela = tela.escolher_ligas_roleta_russa()
@@ -250,7 +314,7 @@ class Pontuacao(RoletaRussa):
             status = r.json()
         except:
             print('Não foi possível pegar a rodada no sistema.')
-            tela = Tela()
+            tela = Exibir()
             return tela.int_input('Digite a rodada:')
         else:
             return status['rodada_atual']
