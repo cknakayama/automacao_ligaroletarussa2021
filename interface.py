@@ -25,9 +25,9 @@ class Interface(Exibir):
                 exit()
             elif escolha['opção'] == 'Cadastrar time':
                 self.escolha_cadastrar_time()
-            elif escolha['opção'] == 'Cadastrar times de uma liga':
+            elif escolha['opção']  == 'Cadastrar times de uma liga':
                 self.escolha_cadastrar_times_liga()
-            elif escolha['opção'] == 'Atualizar informativos':
+            elif escolha['opção']  == 'Atualizar informativos':
                 self.escolha_atualizar_informativos()
             else:
                 print('Opção ainda não foi implementada.')
@@ -47,7 +47,7 @@ class Interface(Exibir):
             if not escolha:
                 return {}
             else:
-                return escolha['opção']
+                return escolha
 
     def escolha_cadastrar_time(self):
         """
@@ -64,7 +64,7 @@ class Interface(Exibir):
                 system('cls') or None
                 print('Saindo do Programa')
                 exit()
-            elif escolha == 'Voltar ao Menu Principal':
+            elif escolha['opção'] == 'Voltar ao Menu Principal':
                 break
 
     def escolha_cadastrar_times_liga(self):
@@ -82,7 +82,7 @@ class Interface(Exibir):
                 system('cls') or None
                 print('Saindo do Programa')
                 exit()
-            elif escolha == 'Voltar ao Menu Principal':
+            elif escolha['opção'] == 'Voltar ao Menu Principal':
                 break
             
     def escolha_atualizar_informativos(self):

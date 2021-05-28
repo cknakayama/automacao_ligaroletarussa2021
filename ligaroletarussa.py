@@ -93,7 +93,7 @@ class Exibir:
         if not escolha:
             return ''
         else:
-            return escolha['opcao'].replace(' ', '').replace('ó', 'o')
+            return escolha['opção'].replace(' ', '').replace('ó', 'o')
 
 
 class RoletaRussa:
@@ -160,19 +160,23 @@ class CadastroTime(RoletaRussa):
     Cadastrar um time no Banco de Dados.
     Basta instanciar a classe que o processo de cadastro se inicia automaticamente.
     """
-    def __init__(self):
+    def __init__(self, dados:dict =None, tabela:str =None):
         super().__init__()
         tela = Exibir()
-        while True:
-            lista_times = self.pesquisar_time()
-            tela.listar_itens(lista_times)
-            time = tela.escolher_entre_opcoes(lista_times)
-            if time:
-                break
-        while True:
-            tabela = tela.escolher_ligas_roleta_russa()
-            if tabela:
-                break
+        if not (dados or tabela):
+            while True:
+                while True:
+                    lista_times = self.pesquisar_time()
+                    tela.listar_itens(lista_times)
+                    time = tela.escolher_entre_opcoes(lista_times)
+                    if time:
+                        break
+                tabela = tela.escolher_ligas_roleta_russa()
+                if tabela:
+                    break
+        else:
+            time = dados
+            tabela = tabela
         self.cadastrar_time_no_BD(tabela=tabela, dados=time)
     
     def pesquisar_time(self, termo_pesquisa:str =None):
@@ -215,17 +219,18 @@ class CadastroTime(RoletaRussa):
             pass
         else:
             con.commit()
-        dados_time2 = (dados['id'], dados['nome'], dados['cartoleiro'], 'OK')
-        try:
-            cursor.execute(f'INSERT INTO TimesCadastrados(ID, Nome, Cartoleiro, {tabela}) VALUES{dados_time2}')
-        except IntegrityError:
-            cursor.execute(f'UPDATE TimesCadastrados SET {tabela}="OK" WHERE ID={dados_time2[0]}')
-            con.commit()
-        except OperationalError:
-            print(f'Não existe a coluna {tabela}.')
-            pass
-        else:
-            con.commit()
+        if tabela in ('LigaPrincipal', 'LigaEliminatória'):
+            dados_time2 = (dados['id'], dados['nome'], dados['cartoleiro'], 'OK')
+            try:
+                cursor.execute(f'INSERT INTO TimesCadastrados(ID, Nome, Cartoleiro, {tabela}) VALUES{dados_time2}')
+            except IntegrityError:
+                cursor.execute(f'UPDATE TimesCadastrados SET {tabela}="OK" WHERE ID={dados_time2[0]}')
+                con.commit()
+            except OperationalError:
+                print(f'Não existe a coluna {tabela} em TimesCadastrados.')
+                pass
+            else:
+                con.commit()
         print(f'Time {dados_time[1]} foi cadastrado com sucesso.')
 
 
