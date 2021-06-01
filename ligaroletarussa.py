@@ -431,7 +431,7 @@ class PontosLigaPrincipal(Pontuacao):
         Salva as 3 melhores pontuações da rodada na tabela Mito.
         """
         con, cursor = self.acessar_banco_de_dados()
-        cursor.execute(f"SELECT ID, Nome, Cartoleiro, Rodada{self.rodada_atual} FROM LigaPrincipal ORDER BY Rodada{self.rodada_atual} LIMIT 3")
+        cursor.execute(f"SELECT ID, Nome, Cartoleiro, Rodada{self.rodada_atual} FROM LigaPrincipal ORDER BY Rodada{self.rodada_atual} DESC LIMIT 3")
         times = cursor.fetchall()
         for t in times:
             valores = (t[0], t[1], t[2], self.rodada_atual, t[3])
@@ -509,7 +509,7 @@ class Informativos(Pontuacao):
         Salva os dados do TOP10 na planilha.
         """
         planilha = self.arquivo['LigaPrincipal']
-        self.cursor.execute("SELECT Nome, PtsTotal FROM LigaPrincipal order by PtsTotal limit 10")
+        self.cursor.execute("SELECT Nome, PtsTotal FROM LigaPrincipal order by PtsTotal DESC limit 10")
         top10 = self.cursor.fetchall()
         contador = 3
         for time in top10:
@@ -523,7 +523,7 @@ class Informativos(Pontuacao):
         """
         planilha = self.arquivo['LigaPrincipal']
         if self.rodada_atual <= 19:
-            self.cursor.execute("SELECT Nome, PtsTotal FROM Turno order by PtsTotal limit 3")
+            self.cursor.execute("SELECT Nome, PtsTotal FROM Turno order by PtsTotal DESC limit 3")
             turno = self.cursor.fetchall()
             contador = 3
             for time in turno:
@@ -531,7 +531,7 @@ class Informativos(Pontuacao):
                 planilha[f'G{contador}'] = time[1]
                 contador += 1
         else:
-            self.cursor.execute("SELECT Nome, PtsTotal FROM Returno order by PtsTotal limit 3")
+            self.cursor.execute("SELECT Nome, PtsTotal FROM Returno order by PtsTotal DESC limit 3")
             returno = self.cursor.fetchall()
             contador = 9
             for time in returno:
@@ -544,7 +544,7 @@ class Informativos(Pontuacao):
         Salva os dados de patrimonio na planilha.
         """
         planilha = self.arquivo['LigaPrincipal']
-        self.cursor.execute("SELECT Nome, C$ FROM Patrimonio order by C$ limit 3")
+        self.cursor.execute("SELECT Nome, C$ FROM Patrimonio order by C$ DESC limit 3")
         patrimonio = self.cursor.fetchall()
         contador = 15
         for time in patrimonio:
@@ -557,7 +557,7 @@ class Informativos(Pontuacao):
         Salva os dados de mito na planilha.
         """
         planilha = self.arquivo['LigaPrincipal']
-        self.cursor.execute("SELECT Nome, Pontuacao, Rodada FROM Mito order by Pontuacao limit 3")
+        self.cursor.execute("SELECT Nome, Pontuacao, Rodada FROM Mito order by Pontuacao DESC limit 3")
         patrimonio = self.cursor.fetchall()
         contador = 21
         for time in patrimonio:
@@ -571,7 +571,7 @@ class Informativos(Pontuacao):
         Salva os dados ds Liga Eliminatória na planilha e 'elimina' o(s) time(s) com menor pontuação.
         """
         planilha = self.arquivo['LigaEliminatória']
-        self.cursor.execute("SELECT Nome, PtsRodada, ID FROM LigaEliminatoria order by PtsRodada")
+        self.cursor.execute("SELECT Nome, PtsRodada, ID FROM LigaEliminatoria order by PtsRodada DESC")
         times = self.cursor.fetchall()
         contador = 3
         for time in times:
