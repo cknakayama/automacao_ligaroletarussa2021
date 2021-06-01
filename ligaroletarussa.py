@@ -435,7 +435,7 @@ class PontosLigaPrincipal(Pontuacao):
         times = cursor.fetchall()
         for t in times:
             valores = (t[0], t[1], t[2], self.rodada_atual, t[3])
-            cursor.execute(f"INSERT INTO Mito(ID, Nome, Cartolero, Rodada, Pontuacao) VALUES{valores}")
+            cursor.execute(f"INSERT INTO Mito(ID, Nome, Cartoleiro, Rodada, Pontuacao) VALUES{valores}")
             con.commit()
         
     def salvar_turno_returno(self, pontos):
@@ -464,8 +464,9 @@ class PontosLigaPrincipal(Pontuacao):
             pontos_total = 0
             for coluna in col[4:(self.rodada_atual + 4)]:
                 cursor.execute(f"SELECT {coluna[1]} FROM {tabela} WHERE ID={t[0]}")
-                if cursor.fetchall()[0][0]:
-                    pontos_total += cursor.fetchall()[0][0]
+                pontos = cursor.fetchall()
+                if pontos[0][0]:
+                    pontos_total += pontos[0][0]
             cursor.execute(f"UPDATE {tabela} SET PtsTotal={pontos_total} WHERE ID={t[0]}")
             con.commit()
 
