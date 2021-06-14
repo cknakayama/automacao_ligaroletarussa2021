@@ -500,6 +500,7 @@ class Informativos(Pontuacao):
         self.patrimonio()
         self.mito()
         self.eliminatoria()
+        self.matamata()
         self.arquivo.save(self.arquivo_xlsx)
         self.arquivo.close()
         print('Informativos Salvos com Sucesso.')
@@ -588,4 +589,17 @@ class Informativos(Pontuacao):
                 self.con.commit()
                 times.pop()
             c -= 1
-        
+    
+    def matamata(self):
+        """
+        Salva os nomes dos times da rodada na planilha MataMataLiga.
+        """
+        planilha = self.arquivo['MataMataLiga']
+        coluna = f"Rodada{self.rodada_atual}"
+        self.cursor.execute(f"SELECT Nome, {coluna} FROM LigaPrincipal ORDER BY {coluna} DESC")
+        times = self.cursor.fetchall()
+        contador = 1
+        for t in times:
+            planilha[f'A{contador}'] = t[0]
+            contador += 1
+
