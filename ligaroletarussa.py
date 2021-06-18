@@ -170,13 +170,14 @@ class CadastroTime(RoletaRussa):
                 time = tela.escolher_entre_opcoes(lista_times)
                 if time:
                     break
+        else:
+            time = dados
         if not tabela:
             while True:
                 tabela = tela.escolher_ligas_roleta_russa()
                 if tabela:
                     break
         else:
-            time = dados
             tabela = tabela
         self.cadastrar_time_no_BD(tabela=tabela, dados=time)
     
@@ -609,6 +610,10 @@ class Informativos(Pontuacao):
 class MataMata(RoletaRussa):
     def __init__(self):
         super().__init__()
+        self.dados_da_liga()
+        self.cadastrar_times()
+
+    def dados_da_liga(self):
         while True:
             self.nome_liga = str(input('Entre com o nome do campeonato: ')).title().replace(" ", "")
             self.num_jogadores = self.numero_jogadores()
@@ -618,10 +623,7 @@ class MataMata(RoletaRussa):
                 print('Já existe campeonato com esse nome. Teste novamente!')
             else:
                 break
-        for contador in range(0, self.num_jogadores):
-            CadastroTime(tabela=self.nome_liga)
-        
-    
+
     def numero_jogadores(self):
         exibir = Exibir()
         while True:
@@ -642,3 +644,8 @@ class MataMata(RoletaRussa):
                             "pontos" REAL, 
                             PRIMARY KEY("n" AUTOINCREMENT));''')
         con.commit()
+
+    def cadastrar_times(self):
+        for contador in range(0, self.num_jogadores):
+            CadastroTime(tabela=self.nome_liga)
+        print(f'{self.num_jogadores} times foram cadastrados com sucesso.')
