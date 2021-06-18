@@ -163,14 +163,15 @@ class CadastroTime(RoletaRussa):
     def __init__(self, dados:dict =None, tabela:str =None):
         super().__init__()
         tela = Exibir()
-        if not (dados or tabela):
+        if not dados:
             while True:
-                while True:
-                    lista_times = self.pesquisar_time()
-                    tela.listar_itens(lista_times)
-                    time = tela.escolher_entre_opcoes(lista_times)
-                    if time:
-                        break
+                lista_times = self.pesquisar_time()
+                tela.listar_itens(lista_times)
+                time = tela.escolher_entre_opcoes(lista_times)
+                if time:
+                    break
+        if not tabela:
+            while True:
                 tabela = tela.escolher_ligas_roleta_russa()
                 if tabela:
                     break
@@ -478,10 +479,12 @@ class PontosLigaEliminatoria(Pontuacao):
     """
     def __init__(self):
         super().__init__()
+        api = self.acesso_autenticado()
+        pontos_times= api.liga(slug='roleta-ru-a-eliminatoria', order_by='rodada')
         tabela = 'LigaEliminatoria'
-        pontos = self.pegar_pontuacao_dos_times(tabela='LigaEliminatoria')
-        for p in pontos:
-            self.salvar_pontos(tabela=tabela, coluna='PtsRodada', pontos=p)
+        for p in pontos_times.times:
+            pontos = {'id':p.id, 'pontos':p.pontos}
+            self.salvar_pontos(tabela=tabela, coluna='PtsRodada', pontos=pontos)
         print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
 
@@ -603,3 +606,39 @@ class Informativos(Pontuacao):
             planilha[f'A{contador}'] = t[0]
             contador += 1
 
+class MataMata(RoletaRussa):
+    def __init__(self):
+        super().__init__()
+        while True:
+            self.nome_liga = str(input('Entre com o nome do campeonato: ')).title().replace(" ", "")
+            self.num_jogadores = self.numero_jogadores()
+            try:
+                self.criando_liga_BD()
+            except sqlite3.OperationalError:
+                print('Já existe campeonato com esse nome. Teste novamente!')
+            else:
+                break
+        for contador in range(0, self.num_jogadores):
+            CadastroTime(tabela=self.nome_liga)
+        
+    
+    def numero_jogadores(self):
+        exibir = Exibir()
+        while True:
+            n = exibir.int_input('Quantos times: ')
+            if n not in (8, 16, 32):
+                print('O número de times deve ser 8 ou 16 ou 32.')
+            else:
+                break
+        return n
+    
+    def criando_liga_BD(self):
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute(f'''CREATE TABLE {self.nome_liga} (
+                            "n" INTEGER, 
+                            "id" INTEGER, 
+                            "nome" TEXT, 
+                            "cartoleiro" TEXT, 
+                            "pontos" REAL, 
+                            PRIMARY KEY("n" AUTOINCREMENT));''')
+        con.commit()
