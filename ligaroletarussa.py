@@ -481,11 +481,17 @@ class PontosLigaEliminatoria(Pontuacao):
     def __init__(self):
         super().__init__()
         api = self.acesso_autenticado()
-        pontos_times= api.liga(slug='roleta-ru-a-eliminatoria', order_by='rodada')
         tabela = 'LigaEliminatoria'
-        for p in pontos_times.times:
-            pontos = {'id':p.id, 'pontos':p.pontos}
-            self.salvar_pontos(tabela=tabela, coluna='PtsRodada', pontos=pontos)
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute(f'Select ID FROM {tabela}')
+        ids = cursor.fetchall()
+        for i in ids:
+            id = i[0]
+            time = api.time(id=id, as_json=True)
+            pontos = 0
+            for j in time['atletas']:
+                pontos += j['pontos_num']
+            cursor.execute(f'UPDATE {tabela} SET PtsRodada={pontos} WHERE ID={id}')
         print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
 
@@ -606,6 +612,7 @@ class Informativos(Pontuacao):
         for t in times:
             planilha[f'A{contador}'] = t[0]
             contador += 1
+
 
 class MataMata(RoletaRussa):
     def __init__(self):
