@@ -4,4 +4,4 @@ import requests
 import cartolafc
 import pandas as pd
 
-x = MataMata()
+x = Informativos()

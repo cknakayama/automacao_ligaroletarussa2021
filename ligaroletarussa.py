@@ -492,6 +492,7 @@ class PontosLigaEliminatoria(Pontuacao):
             for j in time['atletas']:
                 pontos += j['pontos_num']
             cursor.execute(f'UPDATE {tabela} SET PtsRodada={pontos} WHERE ID={id}')
+            con.commit()
         print('Pontuação dos times da Liga Eliminatoria salvas com SUCESSO.')
 
 
