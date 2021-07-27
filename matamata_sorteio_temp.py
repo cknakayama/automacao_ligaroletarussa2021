@@ -5,7 +5,8 @@ from openpyxl import load_workbook
 
 roleta = RoletaRussa()
 con, cursor = roleta.acessar_banco_de_dados()
-cursor.execute("SELECT ID, Nome, Cartoleiro FROM LigaPrincipal ORDER BY Rodada8 DESC;")
+rodada = 'Rodada13'
+cursor.execute(f"SELECT ID, Nome, Cartoleiro FROM LigaPrincipal ORDER BY {rodada} DESC;")
 todos_times = cursor.fetchall()
 lista_times = []
 for t in range(64, 96):
@@ -24,7 +25,6 @@ while True:
         break
 
 contador_planilha = 1
-contador_time = 0
 for a  in range(0, 16):
     time = lista_times[numeros_sorteados[a]]
     planilha[f'A{contador_planilha}'] = time[0]
