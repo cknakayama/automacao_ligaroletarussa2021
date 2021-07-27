@@ -661,7 +661,7 @@ class MataMataLiga(Pontuacao):
 
     def mata_mata_a(self):
         lista_times = self.pegar_times(a=True)
-        numeros_sorteados = self.numeros_aleatorios
+        numeros_sorteados = self.numeros_aleatorios()
         arquivo = load_workbook('ligaroletarussa2021.xlsx')
         planilha = arquivo['MataMataA']
         contador_planilha = 1
@@ -679,10 +679,11 @@ class MataMataLiga(Pontuacao):
             planilha[f'I{contador_planilha + 2}'] = time[2]
             contador_planilha += 4
         arquivo.save('ligaroletarussa2021.xlsx')
+        print('Mata-mata Série A Criado com Sucesso.')
 
     def mata_mata_b(self):
         lista_times = self.pegar_times(b=True)
-        numeros_sorteados = self.numeros_aleatorios
+        numeros_sorteados = self.numeros_aleatorios()
         arquivo = load_workbook('ligaroletarussa2021.xlsx')
         planilha = arquivo['MataMataB']
         contador_planilha = 1
@@ -700,10 +701,11 @@ class MataMataLiga(Pontuacao):
             planilha[f'I{contador_planilha + 2}'] = time[2]
             contador_planilha += 4
         arquivo.save('ligaroletarussa2021.xlsx')
+        print('Mata-mata Série B Criado com Sucesso.')
 
     def mata_mata_c(self):
         lista_times = self.pegar_times(c=True)
-        numeros_sorteados = self.numeros_aleatorios
+        numeros_sorteados = self.numeros_aleatorios()
         arquivo = load_workbook('ligaroletarussa2021.xlsx')
         planilha = arquivo['MataMataC']
         contador_planilha = 1
@@ -721,4 +723,69 @@ class MataMataLiga(Pontuacao):
             planilha[f'I{contador_planilha + 2}'] = time[2]
             contador_planilha += 4
         arquivo.save('ligaroletarussa2021.xlsx')
-        
+        print('Mata-mata Série C Criado com Sucesso.')
+
+    def criar_mata_matas(self):
+        self.mata_mata_a()
+        self.mata_mata_b()
+        self.mata_mata_c()   
+
+    def pontuacao_sem_capitao(self):
+        api = self.acesso_autenticado()
+        arquivo = load_workbook('ligaroletarussa2021.xlsx')
+        planilhas = ['MataMataA','MataMataB', 'MataMataC']
+        for p in planilhas:
+            contador = 1
+            planilha = arquivo[p]
+            while True:
+                id = planilha[f'A{contador}'].value
+                if id:
+                    time = api.time(id=id, as_json=True)
+                    pontos = 0
+                    for jogador in time['atletas']:
+                        pontos += jogador['pontos_num']
+                    planilha[f'F{contador}'] = pontos
+                    contador += 4
+                else:
+                    break
+            contador = 1
+            while True:
+                id = planilha[f'M{contador}'].value
+                if id:
+                    time = api.time(id=id, as_json=True)
+                    pontos = 0
+                    for jogador in time['atletas']:
+                        pontos += jogador['pontos_num']
+                    planilha[f'H{contador}'] = pontos
+                    contador += 4
+                else:
+                    break
+            arquivo.save('ligaroletarussa2021.xlsx')
+
+    def pontuacao_com_capitao(self):
+        api = self.acesso_autenticado()
+        arquivo = load_workbook('ligaroletarussa2021.xlsx')
+        planilhas = ['MataMataA','MataMataB', 'MataMataC']
+        for p in planilhas:
+            contador = 1
+            planilha = arquivo[p]
+            while True:
+                id = planilha[f'A{contador}'].value
+                if id:
+                    time = api.time(id=id, as_json=True)
+                    pontos = time['pontos']
+                    planilha[f'F{contador}'] = pontos
+                    contador += 4
+                else:
+                    break
+            contador = 1
+            while True:
+                id = planilha[f'M{contador}'].value
+                if id:
+                    time = api.time(id=id, as_json=True)
+                    pontos = time['pontos']
+                    planilha[f'H{contador}'] = pontos
+                    contador += 4
+                else:
+                    break
+            arquivo.save('ligaroletarussa2021.xlsx')
