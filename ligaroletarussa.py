@@ -18,9 +18,9 @@ class Exibir:
     @staticmethod
     def exibir_cabecalho(texto:str =''):
         system('cls') or None
-        print('-'*39)
-        print(f"|{texto.upper():^37}|")
-        print('-'*39)
+        print('-'*50)
+        print(f"|{texto.upper():^48}|")
+        print('-'*50)
 
     @staticmethod
     def listar_itens(lista:list):
@@ -155,6 +155,24 @@ class RoletaRussa:
             else:
                 break
         return api
+    
+    def pesquisar_time(self, termo_pesquisa:str =None):
+        """
+        Pesquisa por um time na API do CArtola FC.
+        
+        Recebe:     termo_pesquisa(opcional) - termo que será utilizado para efetuar a pesquisa.
+        
+        Retorna:    lista_times - uma lista de dicionários contendo os dados dos times escontrados.
+        """
+        lista_times = []
+        api = self.acesso_autenticado()
+        if not termo_pesquisa:
+            termo_pesquisa = str(input('Digite o nome do Time: ')).strip()
+        times = api.times(query=termo_pesquisa)
+        for item in times:
+            temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
+            lista_times.append(temp)
+        return lista_times
 
 
 class CadastroTime(RoletaRussa):
@@ -183,24 +201,6 @@ class CadastroTime(RoletaRussa):
             tabela = tabela
         self.cadastrar_time_no_BD(tabela=tabela, dados=time)
     
-    def pesquisar_time(self, termo_pesquisa:str =None):
-        """
-        Pesquisa por um time na API do CArtola FC.
-        
-        Recebe:     termo_pesquisa(opcional) - termo que será utilizado para efetuar a pesquisa.
-        
-        Retorna:    lista_times - uma lista de dicionários contendo os dados dos times escontrados.
-        """
-        lista_times = []
-        api = self.acesso_autenticado()
-        if not termo_pesquisa:
-            termo_pesquisa = str(input('Digite o nome do Time: ')).strip()
-        times = api.times(query=termo_pesquisa)
-        for item in times:
-            temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
-            lista_times.append(temp)
-        return lista_times
-
     def cadastrar_time_no_BD(self, tabela:str, dados:dict):
         """
         Guarda os dados de um time no Banco de Dados.
@@ -659,70 +659,41 @@ class MataMataLiga(Pontuacao):
                 break
         return numeros_sorteados
 
-    def mata_mata_a(self):
-        lista_times = self.pegar_times(a=True)
-        numeros_sorteados = self.numeros_aleatorios()
+    def sorteio(self, lista_times, numeros_sorteados, planilha):
         arquivo = load_workbook('ligaroletarussa2021.xlsx')
-        planilha = arquivo['MataMataA']
         contador_planilha = 1
+        plan = arquivo[planilha]
         for a  in range(0, 16):
             time = lista_times[numeros_sorteados[a]]
-            planilha[f'A{contador_planilha}'] = time[0]
-            planilha[f'B{contador_planilha}'] = time[1]
-            planilha[f'B{contador_planilha + 2}'] = time[2]
+            plan[f'A{contador_planilha}'] = time[0]
+            plan[f'B{contador_planilha}'] = time[1]
+            plan[f'B{contador_planilha + 2}'] = time[2]
             contador_planilha += 4
         contador_planilha = 1
         for b in range(16, 32):
             time = lista_times[numeros_sorteados[b]]
-            planilha[f'M{contador_planilha}'] = time[0]
-            planilha[f'I{contador_planilha}'] = time[1]
-            planilha[f'I{contador_planilha + 2}'] = time[2]
+            plan[f'M{contador_planilha}'] = time[0]
+            plan[f'I{contador_planilha}'] = time[1]
+            plan[f'I{contador_planilha + 2}'] = time[2]
             contador_planilha += 4
         arquivo.save('ligaroletarussa2021.xlsx')
+
+    def mata_mata_a(self):
+        times = self.pegar_times(a=True)
+        numeros = self.numeros_aleatorios()
+        self.sorteio(lista_times=times, numeros_sorteados=numeros, planilha='MataMataA')
         print('Mata-mata Série A Criado com Sucesso.')
 
     def mata_mata_b(self):
-        lista_times = self.pegar_times(b=True)
-        numeros_sorteados = self.numeros_aleatorios()
-        arquivo = load_workbook('ligaroletarussa2021.xlsx')
-        planilha = arquivo['MataMataB']
-        contador_planilha = 1
-        for a  in range(0, 16):
-            time = lista_times[numeros_sorteados[a]]
-            planilha[f'A{contador_planilha}'] = time[0]
-            planilha[f'B{contador_planilha}'] = time[1]
-            planilha[f'B{contador_planilha + 2}'] = time[2]
-            contador_planilha += 4
-        contador_planilha = 1
-        for b in range(16, 32):
-            time = lista_times[numeros_sorteados[b]]
-            planilha[f'M{contador_planilha}'] = time[0]
-            planilha[f'I{contador_planilha}'] = time[1]
-            planilha[f'I{contador_planilha + 2}'] = time[2]
-            contador_planilha += 4
-        arquivo.save('ligaroletarussa2021.xlsx')
+        times = self.pegar_times(b=True)
+        numeros = self.numeros_aleatorios()
+        self.sorteio(lista_times=times, numeros_sorteados=numeros, planilha='MataMataB')
         print('Mata-mata Série B Criado com Sucesso.')
 
     def mata_mata_c(self):
-        lista_times = self.pegar_times(c=True)
-        numeros_sorteados = self.numeros_aleatorios()
-        arquivo = load_workbook('ligaroletarussa2021.xlsx')
-        planilha = arquivo['MataMataC']
-        contador_planilha = 1
-        for a  in range(0, 16):
-            time = lista_times[numeros_sorteados[a]]
-            planilha[f'A{contador_planilha}'] = time[0]
-            planilha[f'B{contador_planilha}'] = time[1]
-            planilha[f'B{contador_planilha + 2}'] = time[2]
-            contador_planilha += 4
-        contador_planilha = 1
-        for b in range(16, 32):
-            time = lista_times[numeros_sorteados[b]]
-            planilha[f'M{contador_planilha}'] = time[0]
-            planilha[f'I{contador_planilha}'] = time[1]
-            planilha[f'I{contador_planilha + 2}'] = time[2]
-            contador_planilha += 4
-        arquivo.save('ligaroletarussa2021.xlsx')
+        times = self.pegar_times(c=True)
+        numeros = self.numeros_aleatorios()
+        self.sorteio(lista_times=times, numeros_sorteados=numeros, planilha='MataMataC')
         print('Mata-mata Série C Criado com Sucesso.')
 
     def criar_mata_matas(self):
@@ -761,6 +732,7 @@ class MataMataLiga(Pontuacao):
                 else:
                     break
             arquivo.save('ligaroletarussa2021.xlsx')
+            print(f'Pontuações do {p} atualizadas!')
 
     def pontuacao_com_capitao(self):
         api = self.acesso_autenticado()
@@ -789,3 +761,178 @@ class MataMataLiga(Pontuacao):
                 else:
                     break
             arquivo.save('ligaroletarussa2021.xlsx')
+            print(f'Pontuações do {p} atualizadas!')
+
+
+class MataMataDuplas(Pontuacao):
+    def __init__(self):
+        super().__init__()
+        self.tabela_bd = 'MMDuplas'
+    
+    def escolher_time(self):
+        tela = Exibir()
+        while True:
+            lista_times = self.pesquisar_time()
+            tela.listar_itens(lista_times)
+            time = tela.escolher_entre_opcoes(lista_times)
+            if time:
+                break
+        return time
+
+    def cadastrar_duplas(self):
+        contador = 1
+        tela = Exibir()
+        while True:
+            tela.exibir_cabecalho(f'Dupla {contador}')
+            dupla = str(input('Nome da Dupla: ')).upper().strip()
+            tela.exibir_cabecalho(f'{dupla}')
+            print('Time 1')
+            time1 = self.escolher_time()
+            print('Time 2')
+            time2 = self.escolher_time()
+            con, cursor = self.acessar_banco_de_dados()
+            dados = (dupla, time1['id'], time1['nome'], time2['id'], time2['nome'])
+            cursor.execute(f'INSERT INTO {self.tabela_bd}(Dupla, ID_Time1, Nome_Time1, ID_Time2, Nome_Time2) VALUES{dados}')
+            con.commit()
+            print(f"""
+            Dupla: {dupla}
+            Time 1: {time1['nome']}
+            Time 2: {time2['nome']}
+
+            Cadastro Efetuado com Sucesso.
+            """)
+            while True:
+                escolha = str(input('Cadastrar mais Duplas? [S/N] ')).upper().strip()
+                if escolha == 'N':
+                    exit()
+                if escolha == 'S':
+                    break
+                else:
+                    print('Opção inválida. ')
+            if contador == 32:
+                print('As 32 Duplas já foram cadastradas!')
+                break
+            else:
+                contador += 1
+
+    def numeros_aleatorios(self):
+        numeros_sorteados = []
+        while True:
+            numero = randint(0, 31)
+            if numero not in numeros_sorteados:
+                numeros_sorteados.append(numero)
+            elif len(numeros_sorteados) == 32:
+                break
+        return numeros_sorteados
+
+    def sorteio(self):
+        arquivo = load_workbook('ligaroletarussa2021.xlsx')
+        planilha = arquivo['MataMataDuplas']
+        numeros = self.numeros_aleatorios()
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute(f'SELECT * FROM {self.tabela_bd}')
+        duplas = cursor.fetchall()
+        contador_planilha = 1
+        for a in range(0, 16):
+            time = duplas[numeros[a]]
+            planilha[f'F{contador_planilha}'] = time[1]
+            planilha[f'A{contador_planilha}'] = time[2]
+            planilha[f'B{contador_planilha}'] = time[3]
+            planilha[f'A{contador_planilha + 1}'] = time[4]
+            planilha[f'B{contador_planilha + 1}'] = time[5]
+            contador_planilha += 3
+        contador_planilha = 1
+        for a in range(16, 32):
+            time = duplas[numeros[a]]
+            planilha[f'M{contador_planilha}'] = time[1]
+            planilha[f'U{contador_planilha}'] = time[2]
+            planilha[f'Q{contador_planilha}'] = time[3]
+            planilha[f'U{contador_planilha + 1}'] = time[4]
+            planilha[f'Q{contador_planilha + 1}'] = time[5]
+            contador_planilha += 3
+        arquivo.save('ligaroletarussa2021.xlsx')
+
+    def criar_mata_mata_duplas(self):
+        self.cadastrar_duplas()
+        self.sorteio()
+        print('Mata-mata em Duplas criado com sucesso.')
+    
+    def pontuacao_sem_capitao(self):
+        api = self.acesso_autenticado()
+        arquivo = load_workbook('ligaroletarussa2021.xlsx')
+        planilha = arquivo['MataMataDuplas']
+        contador = 1
+        while True:
+            id1 = planilha[f'A{contador}'].value
+            id2 = planilha[f'A{contador + 1}'].value
+            if id1:
+                time1 = api.time(id=id1, as_json=True)
+                time2 = api.time(id=id2, as_json=True)
+                pontos = 0
+                for j1 in time1['atletas']:
+                    pontos += j1['pontos_num']
+                for j2 in time2['atletas']:
+                    pontos += j2['pontos_num']
+                planilha[f'J{contador}'] = pontos
+                contador +3
+            else:
+                break
+        contador = 1
+        while True:
+            id1 = planilha[f'U{contador}'].value
+            id2 = planilha[f'U{contador + 1}'].value
+            if id1:
+                time1 = api.time(id=id1, as_json=True)
+                time2 = api.time(id=id2, as_json=True)
+                pontos = 0
+                for j1 in time1['atletas']:
+                    pontos += j1['pontos_num']
+                for j2 in time2['atletas']:
+                    pontos += j2['pontos_num']
+                planilha[f'L{contador}'] = pontos
+                contador +3
+            else:
+                break
+        arquivo.save('ligaroletarussa2021.xlsx')
+        print(f'Pontuações do MataMataDuplas atualizadas!')
+
+    def pontuacao_com_capitao(self):
+        api = self.acesso_autenticado()
+        arquivo = load_workbook('ligaroletarussa2021.xlsx')
+        planilha = arquivo['MataMataDuplas']
+        contador = 1
+        while True:
+            id1 = planilha[f'A{contador}'].value
+            id2 = planilha[f'A{contador + 1}'].value
+            pontos = 0
+            if id1:
+                time1 = api.time(id=id1, as_json=True)
+                pontos += time1['pontos']
+                time2 = api.time(id=id2, as_json=True)
+                pontos += time2['pontos']
+                planilha[f'J{contador}'] = pontos
+                contador += 3
+            else:
+                break
+        contador = 1
+        while True:
+            id1 = planilha[f'U{contador}'].value
+            id2 = planilha[f'U{contador + 1}'].value
+            pontos = 0
+            if id1:
+                time1 = api.time(id=id1, as_json=True)
+                pontos += time1['pontos']
+                time2 = api.time(id=id2, as_json=True)
+                pontos += time2['pontos']
+                planilha[f'L{contador}'] = pontos
+                contador += 3
+            else:
+                break
+        arquivo.save('ligaroletarussa2021.xlsx')
+        print(f'Pontuações do MataMataDuplas atualizadas!')
+
+
+
+
+
+

@@ -1,8 +1,7 @@
-from ligaroletarussa import Informativos, MataMataLiga, PontosLigaEliminatoria
+from ligaroletarussa import Informativos, MataMataDuplas, MataMataLiga, PontosLigaEliminatoria
 import sqlite3
 import requests
 import cartolafc
-import pandas as pd
 
-x = MataMataLiga()
-x.criar_mata_matas()
+x = MataMataDuplas()
+x.cadastrar_dupla()
