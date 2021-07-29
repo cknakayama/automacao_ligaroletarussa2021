@@ -1,4 +1,4 @@
-from sqlite3.dbapi2 import IntegrityError, OperationalError
+from sqlite3.dbapi2 import Cursor, IntegrityError, OperationalError
 import cartolafc
 import sqlite3
 from openpyxl.descriptors import base
@@ -173,7 +173,26 @@ class RoletaRussa:
             temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
             lista_times.append(temp)
         return lista_times
-
+    
+    def atualizar_nomes(self, tabela):
+        api = self.acesso_autenticado()
+        con, cursor = self.acessar_banco_de_dados()
+        while True:
+            try:
+                cursor.execute(f"SELECT ID, Nome, Cartoleiro FROM {tabela}")
+            except OperationalError:
+                print(f'Tabela {tabela} ou Colunas ID, Nome e Cartoleiro inexistentes.')
+                continue
+            else:
+                times = cursor.fetchall()
+                break
+        for t in times:
+            id = t[0]
+            time = api.time(id=id, as_json=True)
+            atual = {'nome' : time['time']['nome'], 'cartoleiro' : time['time']['nome_cartola']}
+            cursor.execute(f'UPDATE {tabela} SET Nome="{atual["nome"]}", Cartoleiro="{atual["cartoleiro"]}" WHERE ID={id}')
+            con.commit()
+       
 
 class CadastroTime(RoletaRussa):
     """
@@ -194,12 +213,12 @@ class CadastroTime(RoletaRussa):
             time = dados
         if not tabela:
             while True:
-                tabela = tela.escolher_ligas_roleta_russa()
-                if tabela:
+                tab = tela.escolher_ligas_roleta_russa()
+                if tab:
                     break
         else:
-            tabela = tabela
-        self.cadastrar_time_no_BD(tabela=tabela, dados=time)
+            tab = tabela
+        self.cadastrar_time_no_BD(tabela=tab, dados=time)
     
     def cadastrar_time_no_BD(self, tabela:str, dados:dict):
         """
@@ -930,6 +949,87 @@ class MataMataDuplas(Pontuacao):
                 break
         arquivo.save('ligaroletarussa2021.xlsx')
         print(f'Pontuações do MataMataDuplas atualizadas!')
+
+class Mensal(Pontuacao):
+    def __init__(self):
+        super().__init__()
+    
+    def resetar_torneio(self):
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute('DROP TABLE Mensal')
+        con.commit()
+        cursor.execute('''
+        CREATE TABLE "Mensal" (
+        "ID"	INTEGER,
+        "Nome"	TEXT,
+        "Cartoleiro"	TEXT,
+        "Pts_Total"	REAL,
+        PRIMARY KEY("ID")
+        );
+        ''')
+        con.commit()
+        print('Torneio Resetado.')
+
+    def adicionar_times(self):
+        tela = Exibir()
+        tela.exibir_cabecalho('Torneio Mensal - Cadastrar Times')
+        while True:
+            CadastroTime(tabela='Mensal')
+            escolha = str(input('Deseja cadastrar mais times? [S/N]')).upper().strip()
+            if escolha == 'N':
+                break
+
+    def atualizar_pontuacao_com_capitao(self):
+        api = self.acesso_autenticado()
+        con, cursor = self.acessar_banco_de_dados()
+        try:
+            cursor.execute(f'ALTER TABLE Mensal ADD COLUMN Rodada{self.rodada_atual} INTEGER')
+        except OperationalError:
+            pass
+        else:
+            con.commit()
+        cursor.execute('SELECT ID FROM Mensal')
+        ids = cursor.fetchall()
+        for id in ids:
+            time = api.time(id=id, as_json=True)
+            pontos = time['pontos']
+            cursor.execute(f'UPDATE Mensal SET Rodada{self.rodada_atual}={pontos} WHERE ID={id}')
+            con.commit()
+        self.soma_pontuacao_total()
+        
+    def atualizar_pontuacao_sem_capitao(self):
+        api = self.acesso_autenticado()
+        con, cursor = self.acessar_banco_de_dados()
+        try:
+            cursor.execute(f'ALTER TABLE Mensal ADD COLUMN Rodada{self.rodada_atual} INTEGER')
+        except OperationalError:
+            pass
+        else:
+            con.commit()
+        cursor.execute('SELECT ID FROM Mensal')
+        ids = cursor.fetchall()
+        for id in ids:
+            time = api.time(id=id, as_json=True)
+            pontos = 0
+            for jogador in time['atletas']:
+                pontos += jogador['pontos_num']
+            cursor.execute(f'UPDATE Mensal SET Rodada{self.rodada_atual}={pontos} WHERE ID={id}')
+            con.commit()
+        self.soma_pontuacao_total()
+    
+    def soma_pontuacao_total(self):
+        con, cursor = self.acessar_banco_de_dados()
+        cursor.execute("PRAGMA table_info('Mensal')")
+        colunas = cursor.fetchall()
+        if len(colunas)>4:
+            cursor.execute('SELECT * FROM Mensal')
+            times = cursor.fetchall()
+            for time in times:
+                ptotal = 0
+                for coluna in time[4:]:
+                    ptotal += coluna
+                cursor.execute(f'UPDATE Mensal SET Pts_Total={ptotal} WHERE ID={time[0]}')
+                con.commit()
 
 
 
