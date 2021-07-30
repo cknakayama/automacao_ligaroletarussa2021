@@ -7,5 +7,5 @@ import cartolafc
 #tabelas = ('LigaEliminatoria', 'LigaPrincipal', 'Mito', 'Patrimonio', 'Returno', 'Turno', 'TimesCadastrados')
 #for t in tabelas:
 #    x.atualizar_nomes(tabela=t)
-x = Mensal()
-x.resetar_torneio()
+x = MataMataDuplas()
+x.sorteio()

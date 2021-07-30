@@ -166,12 +166,18 @@ class RoletaRussa:
         """
         lista_times = []
         api = self.acesso_autenticado()
-        if not termo_pesquisa:
-            termo_pesquisa = str(input('Digite o nome do Time: ')).strip()
-        times = api.times(query=termo_pesquisa)
-        for item in times:
-            temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
-            lista_times.append(temp)
+        while True:
+            if not termo_pesquisa:
+                termo_pesquisa = str(input('Digite o nome do Time: ')).strip()
+            times = api.times(query=termo_pesquisa)
+            try:
+                for item in times:
+                    temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
+                    lista_times.append(temp)
+            except:
+                print('Time não encontrado.')
+            else:
+                break
         return lista_times
     
     def atualizar_nomes(self, tabela):
