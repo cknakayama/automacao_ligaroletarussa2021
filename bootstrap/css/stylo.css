@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@1,600&family=Roboto:wght@100&display=swap');
+body{
+	background:linear-gradient(#FF8C00,#FFA500);
+	font-family: 'Bodoni Moda', serif;
+	
+}
+a{
+	text-decoration: none;
+	font-size: 15px;
+	color: darkblue;
+	text-shadow: 2px 2px 2px #F0E68C;
+}
+#foto{
+	margin-top: -22px;
+}
+.tamanho_foto{
+	width: 30%;
+	border-radius: 5px;
+
+	
+
+}
+#alinha{
+	background-color: black;
+
+}
+#troca{
+	background-color: #DCDCDC;
+	border-radius: 5px;
+	padding: 5px;
+	text-align: center;
+	margin-top: 70px;
+}
+.aumenta_fonte{
+	font-size: 14px;
+	padding: 5px;
+	border-radius: 10px;
+	color:black;
+	background-color: #D3D3D3;
+	box-shadow: 1px 2px 3px black;
+}
+.fundo{
+	background-color: #DCDCDC;
+	text-align: center;
+	padding: 2px;
+	margin-top: -20px;
+	box-shadow: 2px 2px 3px black;
+	
+}
+.cor{
+	background:linear-gradient(#696969,#808080) ;
+	text-shadow: 2px 2px 3px black;
+	font-family: 'Bodoni Moda', serif;
+	color: white;
+	text-align: center;
+	text-decoration: none;
+	padding: 10px;
+	border-radius: 12px;
+	box-shadow: 2px 2px 2px black;
+	margin-top: 20px;
+}
+@media(min-width:700px){
+.menu_principal{
+
+	margin-top: 5px;
+	font-size: 30px;
+	margin-left: 700px;
+	margin-bottom: 0px;
+	}
+}
+#imagem{
+	width: 30%;
+	margin-left: 20px;
+	margin-top: 1px;
+	float: left;
+	position: absolute;
+
+}
+
+@media(min-width:700px){
+.metade{
+	width: 50%;
+
+	}
+}
+
+footer{
+	background-color: blue;
+	height: 100%;
+	text-align: center;
+	color: white;
+	padding: 20px;
+	margin-bottom: 0px;
+	background:linear-gradient(#3A405A,#3A407A) ;
+	text-shadow: 2px 2px 3px black;
+	font-family: 'Bodoni Moda', serif;
+}
