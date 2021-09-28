@@ -166,18 +166,24 @@ class RoletaRussa:
         """
         lista_times = []
         api = self.acesso_autenticado()
-        while True:
-            if not termo_pesquisa:
+        if not termo_pesquisa:
+            while True:
                 termo_pesquisa = str(input('Digite o nome do Time: ')).strip()
-            times = api.times(query=termo_pesquisa)
-            try:
-                for item in times:
+                times = api.times(query=termo_pesquisa)
+                if times:
+                    break
+                else:
+                    print('Time não encontrado.')
+        else:
+            while True:
+                times = api.times(query=termo_pesquisa)
+                if times:
+                    break
+                else:
+                    print('Time não encontrado.')
+        for item in times:
                     temp = {"id":item.id, "nome":item.nome, "cartoleiro":item.nome_cartola}
                     lista_times.append(temp)
-            except:
-                print('Time não encontrado.')
-            else:
-                break
         return lista_times
     
     def atualizar_nomes(self, tabela):
@@ -882,6 +888,74 @@ class MataMataDuplas(Pontuacao):
         self.sorteio()
         print('Mata-mata em Duplas criado com sucesso.')
     
+    def alterar_dupla(self):
+        api = self.acesso_autenticado()
+        con, cursor = self.acessar_banco_de_dados()
+        tela = Exibir()
+        tela.exibir_cabecalho("Qual Dupla deseja alterar?")
+        cursor.execute(f"SELECT * FROM {self.tabela_bd} ORDER BY ID")
+        duplas = cursor.fetchall()
+        lista_duplas = []
+        for dupla in duplas:
+            d = {
+                "id":dupla[0], 
+                "Nome da Dupla":dupla[1], 
+                "ID Time 1":dupla[2],
+                "Nome Time 1":dupla[3],
+                "ID Time 2":dupla[4],
+                "Nome Time 2":dupla[5]}
+            lista_duplas.append(d)
+        tela.listar_itens(lista_duplas)
+        escolha = tela.escolher_entre_opcoes(lista_duplas)
+        if not escolha:
+            system("cls")
+            print("Nenhuma Dupla foi modificada.")
+            exit()
+
+        print(f"Nome da Dupla: {escolha['Nome da Dupla']}")
+        while True:
+            x = str(input("Deseja alterar o nome da Dupla?[S/N]")).strip().upper()
+            if x == "N":
+                break
+            elif x == "S":
+                escolha["Nome da Dupla"] = str(input("Digite o nome da Dupla: ")).strip().upper()
+                break
+            else:  
+                print("Opção inválida, escolha novamente!")
+        
+        for c in range(1, 3):
+            print(f"Time {c}: {escolha[f'Nome Time {c}']}")
+            while True:
+                x = str(input("Deseja trocar esse time?[S/N]")).strip().upper()
+                if x == "N":
+                    break
+                elif x == "S":
+                    while True:
+                        times = self.pesquisar_time()
+                        tela.listar_itens(times)
+                        time = tela.escolher_entre_opcoes(times)
+                        if time:
+                            escolha[f'Nome Time {c}'] = time['nome']
+                            escolha[f'ID Time {c}'] = time['id']
+                            print(f"Time substituido por {time}")
+                            break
+                    break
+                else:  
+                    print("Opção inválida, escolha novamente!")
+        
+        dupla_nova = (
+            escolha["id"], 
+            escolha["Nome da Dupla"], 
+            escolha["ID Time 1"],
+            escolha["Nome Time 1"],
+            escolha["ID Time 2"],
+            escolha["Nome Time 2"]
+        )
+        cursor.execute(f"UPDATE {self.tabela_bd} SET Dupla = {dupla_nova[1]}, ID_Time1 = {dupla_nova[2]}, Nome_Time1 = {dupla_nova[3]}, ID_Time2 = {dupla_nova[4]}, Nome_Time2 = {dupla_nova[5]} WHERE ID = {dupla_nova[0]}")
+        con.commit()
+        print(escolha)
+        print("Dupla Atualizada.")
+                
     def pontuacao_sem_capitao(self):
         api = self.acesso_autenticado()
         arquivo = load_workbook('ligaroletarussa2021.xlsx')
@@ -955,6 +1029,7 @@ class MataMataDuplas(Pontuacao):
                 break
         arquivo.save('ligaroletarussa2021.xlsx')
         print(f'Pontuações do MataMataDuplas atualizadas!')
+
 
 class Mensal(Pontuacao):
     def __init__(self):

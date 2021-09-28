@@ -8,4 +8,4 @@ import cartolafc
 #for t in tabelas:
 #    x.atualizar_nomes(tabela=t)
 x = MataMataDuplas()
-x.sorteio()
+x.alterar_dupla()
