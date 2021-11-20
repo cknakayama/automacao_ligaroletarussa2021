@@ -1,4 +1,4 @@
-from ligaroletarussa import Informativos, MataMataDuplas, MataMataLiga, Mensal, PontosLigaEliminatoria, Pontuacao, RoletaRussa
+from ligaroletarussa import Informativos, MataMataDuplas, MataMataLiga, Mensal, PontosLigaEliminatoria, Pontuacao, RoletaRussa, ControleMataMatasLiga
 import sqlite3
 import requests
 import cartolafc
@@ -11,8 +11,8 @@ import cartolafc
 #x = MataMataDuplas()
 #x.alterar_dupla()
 
-x = Pontuacao()
-api = x.acesso_autenticado()
-liga = api.liga(slug="roleta-ru-a", order_by="rodada").times
-for time in liga:
-    print(time)
+x = RoletaRussa()
+con, cursor = x.acessar_banco_de_dados()
+cursor.execute('SELECT * FROM MataMataLigaParticipantes WHERE MataMata="A"')
+cursor.fetchall()
+print(cursor)

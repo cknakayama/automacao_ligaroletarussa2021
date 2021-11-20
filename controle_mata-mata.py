@@ -23,5 +23,6 @@ class MataMatasLiga(Pontuacao):
             dados = (mata_mata, time["id"], time["nome"], time["nome_cartola"])
             cursor.execute(f'INSERT INTO MataMataLigaParticipantes(MataMata, ID, Nome_Time, Nome_Cartoleiro) VALUES{dados}')
             con.commit()
+            contador += 1
 
 

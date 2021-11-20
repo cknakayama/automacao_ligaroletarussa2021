@@ -1113,6 +1113,41 @@ class Mensal(Pontuacao):
                 con.commit()
 
 
+class ControleMataMatasLiga(Pontuacao):
+    def __init__(self):
+        super().__init__()
+    
+    def cadastrar_times(self):
+        api = self.acesso_autenticado()
+        con, cursor = self.acessar_banco_de_dados()
+        liga = api.liga(slug="roleta-ru-a", order_by="rodada").times
+        contador = 0
+        for time in liga:
+            if contador < 32:
+                mata_mata = "A"
+            elif 32 <= contador < 64:
+                mata_mata = "B"
+            elif 64 <= contador < 96:
+                mata_mata = "C"
+            else:
+                break
+            dados = (mata_mata, time.id, time.nome, time.nome_cartola)
+            cursor.execute(f'INSERT INTO MataMataLigaParticipantes(MataMata, ID, Nome_Time, Nome_Cartoleiro) VALUES{dados}')
+            con.commit()
+            contador += 1
+
+    def sorteio(self):
+        con, cursor = self.acessar_banco_de_dados()
+        for m in ("A", "B", "C"):
+            cursor.execute(f'SELECT * FROM MataMataLigaConfrontos WHERE MataMata = {m}')
+            times = cursor.fetchall()
+            confronto = 1
+            while True:
+                sorteados = []
+                numero1 = randint(0, (len(times-1)))
+                
+
+
 
 
 
