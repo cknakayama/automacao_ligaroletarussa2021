@@ -2,27 +2,17 @@ from ligaroletarussa import *
 
 
 class MataMatasLiga(Pontuacao):
-    def __init__(self):
-        super().__init__()
-    
-    def cadastrar_times(self):
-        api = self.acesso_autenticado()
-        con, cursor = self.acessar_banco_de_dados()
-        liga = api.liga(slug="roleta-ru-a", order_bt="rodada").times
-        contador = 0
-        for time in liga:
-            if contador < 32:
-                mata_mata = "A"
-            elif 32 <= contador < 64:
-                mata_mata = "B"
-            elif 64 <= contador < 96:
-                mata_mata = "C"
-            else:
-                break
-            time = liga[contador]
-            dados = (mata_mata, time["id"], time["nome"], time["nome_cartola"])
-            cursor.execute(f'INSERT INTO MataMataLigaParticipantes(MataMata, ID, Nome_Time, Nome_Cartoleiro) VALUES{dados}')
-            con.commit()
-            contador += 1
+tabelas = ("MataMataA", "MataMataB", "MataMataC")
+
+def atualizar_pontuacao(self):
+    api = self.acesso_autenticado()
+    arquivo = load_workbook('Planilha-Mata-matas.xlsx')
+    for tabela in tabelas:
+        planilha = arquivo(tabela)
+        contador = 2
+        while True:
+            id = planilha[f'C{contador}']
+            time = api.time(id=id, as_json=True)
+            
 
 
